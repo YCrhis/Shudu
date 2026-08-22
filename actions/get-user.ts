@@ -18,8 +18,6 @@ export const GetUser = async() => {
             console.error("Error calling user" , userError)
         }
 
-        console.log(userData, ' uuuu')
-
         return userData
 
     } catch (error) {
