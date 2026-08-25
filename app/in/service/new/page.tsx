@@ -8,6 +8,8 @@ import EmployeeCard from "@/components/repair/EmployeeCard";
 import { User } from "@/types/user";
 import { RepairI } from "@/types/repair";
 import { PostCall } from "@/helpers/PostCall";
+import UIModalMessage from "@/components/modals/UIModalMessage";
+import { useRouter } from "next/navigation";
 
 const statusOptions = [
   {
@@ -30,19 +32,21 @@ const statusOptions = [
 
 const CreateRepair = () => {
   const [users, setUsers] = useState<User[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const [form, setForm] = useState<RepairI>({
     name_vehicle: "",
-    title:"",
+    title: "",
     description: "",
     vehicle_type: "",
     end_date: "",
     init_date: new Date().toISOString(),
     license_plate: "",
-    vehicle_model: ""
-  })
+    vehicle_model: "",
+  });
 
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
+  const router = useRouter()
 
   const [status, setStatus] = useState("pending");
 
@@ -54,37 +58,43 @@ const CreateRepair = () => {
     );
   };
 
-  const handleSubmit = async(event: React.FormEvent<HTMLFormElement>) => {
+  const handleGoInit = () => {
+    router.push("/in")
+  }
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log(form, ' form')
-    const sendingData = {
-      ...form, 
-      end_date: new Date(form.end_date).toISOString()
+    const response = await PostCall({ data: form, url: "/api/repair" });
+    if (response.success) {
+      setModalOpen(true);
     }
-    const response = await PostCall({data:form, url: "/api/repair"})
-    console.log(response);
   };
 
-  const handleChangeForm = (name:string, e:string) => {
-    setForm((prev)=>({...prev, [name]: e}))
-  }
+  const handleChangeForm = (name: string, e: string) => {
+    setForm((prev) => ({ ...prev, [name]: e }));
+  };
 
   useEffect(() => {
     const loadUsers = async () => {
       const response = await fetch("/api/users");
 
-      const {data} = await response.json();
-      setUsers(data)
+      const { data } = await response.json();
+      setUsers(data);
     };
 
     loadUsers();
   }, []);
 
-  console.log(users, ' user')
-
 
   return (
     <main className="min-h-screen bg-[#09090B] text-zinc-100">
+      <UIModalMessage
+        isOpen={modalOpen}
+        onClose={() => handleGoInit()}
+        type="success"
+        title="Repair created successfully"
+        message="The repair has been registered and the assigned employees have been notified."
+      />
       {/* Header */}
       <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-[#09090B]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1600px] items-center justify-between px-6 py-4 lg:px-8">
@@ -182,7 +192,9 @@ const CreateRepair = () => {
                     label="Vehicle name"
                     placeholder="e.g. Volvo FMX 540"
                     value={form.name_vehicle}
-                    onChange={(event) => handleChangeForm("name_vehicle",event.target.value)}
+                    onChange={(event) =>
+                      handleChangeForm("name_vehicle", event.target.value)
+                    }
                     required
                   />
 
@@ -192,7 +204,9 @@ const CreateRepair = () => {
                     label="Vehicle type"
                     placeholder="e.g. Dump Truck"
                     value={form.vehicle_type}
-                    onChange={(event) => handleChangeForm("vehicle_type",event.target.value)}
+                    onChange={(event) =>
+                      handleChangeForm("vehicle_type", event.target.value)
+                    }
                     required
                   />
                   <UIInput
@@ -201,7 +215,9 @@ const CreateRepair = () => {
                     label="License plate"
                     placeholder="e.g. ABC-742"
                     value={form.license_plate}
-                    onChange={(event) => handleChangeForm("license_plate",event.target.value)}
+                    onChange={(event) =>
+                      handleChangeForm("license_plate", event.target.value)
+                    }
                   />
 
                   <UIInput
@@ -210,7 +226,9 @@ const CreateRepair = () => {
                     label="Model / year"
                     placeholder="e.g. 2022"
                     value={form.vehicle_model}
-                    onChange={(event) => handleChangeForm("vehicle_model",event.target.value)}
+                    onChange={(event) =>
+                      handleChangeForm("vehicle_model", event.target.value)
+                    }
                   />
                 </div>
               </section>
@@ -243,7 +261,9 @@ const CreateRepair = () => {
                     label="Repair title"
                     placeholder="e.g. Hydraulic system repair"
                     value={form.title}
-                    onChange={(event) => handleChangeForm("title",event.target.value)}
+                    onChange={(event) =>
+                      handleChangeForm("title", event.target.value)
+                    }
                     required
                   />
 
@@ -260,7 +280,9 @@ const CreateRepair = () => {
                       id="description"
                       name="description"
                       value={form.description}
-                      onChange={(event) => handleChangeForm("description",event.target.value)}
+                      onChange={(event) =>
+                        handleChangeForm("description", event.target.value)
+                      }
                       placeholder="Describe the problem, symptoms and required work..."
                       rows={6}
                       required
@@ -302,7 +324,12 @@ const CreateRepair = () => {
                     const selected = selectedEmployees.includes(employee.id);
 
                     return (
-                      <EmployeeCard selected={selected} employee={employee} toggleEmployee={toggleEmployee} key={employee.id}/>
+                      <EmployeeCard
+                        selected={selected}
+                        employee={employee}
+                        toggleEmployee={toggleEmployee}
+                        key={employee.id}
+                      />
                     );
                   })}
                 </div>
@@ -357,7 +384,9 @@ const CreateRepair = () => {
                     type="date"
                     label="Deadline"
                     value={form.end_date}
-                    onChange={(event) => handleChangeForm("end_date", event.target.value)}
+                    onChange={(event) =>
+                      handleChangeForm("end_date", event.target.value)
+                    }
                     required
                   />
                 </div>
@@ -423,9 +452,9 @@ const CreateRepair = () => {
 
                     {(form.license_plate || form.vehicle_model) && (
                       <div className="mt-3 flex gap-2">
-                        {form.license_plate  && (
+                        {form.license_plate && (
                           <span className="rounded-md bg-zinc-900 px-2 py-1 font-mono text-[10px] text-zinc-500">
-                            {form.license_plate }
+                            {form.license_plate}
                           </span>
                         )}
 
@@ -494,9 +523,7 @@ const CreateRepair = () => {
                         </p>
                       ) : (
                         selectedEmployees.map((id) => {
-                          const employee = users.find(
-                            (item) => item.id === id,
-                          );
+                          const employee = users.find((item) => item.id === id);
 
                           if (!employee) {
                             return null;
