@@ -1,10 +1,15 @@
+import { User } from "@/types/user";
+
 interface Props {
-  employee: any;
+  employee: User;
   toggleEmployee: (id: string) => void;
   selected: boolean;
 }
 
 const EmployeeCard = ({ employee, toggleEmployee, selected }: Props) => {
+
+  const employeeInitials = employee.full_name.split(" ").slice(0,2).map(t => t[0]).join("");
+
   return (
     <div
       key={employee.id}
@@ -20,11 +25,11 @@ const EmployeeCard = ({ employee, toggleEmployee, selected }: Props) => {
           selected ? "bg-amber-500 text-black" : "bg-zinc-900 text-zinc-500"
         }`}
       >
-        {employee.initials}
+        {employeeInitials}
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold">{employee.name}</p>
+        <p className="truncate text-sm font-semibold">{employee.full_name}</p>
 
         <p className="mt-1 truncate text-xs text-zinc-600">{employee.role}</p>
       </div>

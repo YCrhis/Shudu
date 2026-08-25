@@ -30,6 +30,7 @@ export async function GET(request: Request) {
       email: user.email,
       full_name: user.user_metadata?.full_name,
       avatar_url: user.user_metadata?.avatar_url,
+      role: "Mechanic"
     });
 
   if (profileError) {

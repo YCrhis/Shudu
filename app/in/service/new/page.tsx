@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 
 import UIInput from "@/components/UI/UIInput";
 import UISelect from "@/components/UI/UISelect";
-import { GetAllUsers } from "@/actions/get-user";
 import EmployeeCard from "@/components/repair/EmployeeCard";
+import { User } from "@/types/user";
+import { RepairI } from "@/types/repair";
+import { PostCall } from "@/helpers/PostCall";
 
 const statusOptions = [
   {
@@ -26,48 +28,23 @@ const statusOptions = [
   },
 ];
 
-const employees = [
-  {
-    id: "1",
-    name: "Juan Pérez",
-    role: "Lead Mechanic",
-    initials: "JP",
-  },
-  {
-    id: "2",
-    name: "Carlos Mendoza",
-    role: "Hydraulic Technician",
-    initials: "CM",
-  },
-  {
-    id: "3",
-    name: "Miguel Torres",
-    role: "Mechanic",
-    initials: "MT",
-  },
-  {
-    id: "4",
-    name: "Luis Ramírez",
-    role: "Heavy Equipment Technician",
-    initials: "LR",
-  },
-];
-
 const CreateRepair = () => {
-  const [users, setUsers] = useState([])
-  const [vehicleName, setVehicleName] = useState("");
-  const [vehicleType, setVehicleType] = useState("");
-  const [vehiclePlate, setVehiclePlate] = useState("");
-  const [vehicleModel, setVehicleModel] = useState("");
+  const [users, setUsers] = useState<User[]>([]);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+  const [form, setForm] = useState<RepairI>({
+    name_vehicle: "",
+    title:"",
+    description: "",
+    vehicle_type: "",
+    end_date: "",
+    init_date: new Date().toISOString(),
+    license_plate: "",
+    vehicle_model: ""
+  })
 
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
 
   const [status, setStatus] = useState("pending");
-  const [deadline, setDeadline] = useState("");
-  const [comment, setComment] = useState("");
 
   const toggleEmployee = (employeeId: string) => {
     setSelectedEmployees((current) =>
@@ -77,35 +54,33 @@ const CreateRepair = () => {
     );
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async(event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    const repair = {
-      vehicleName,
-      vehicleType,
-      vehiclePlate,
-      vehicleModel,
-      title,
-      description,
-      employees: selectedEmployees,
-      status,
-      deadline,
-      comment,
-    };
-
-    console.log(repair);
+    console.log(form, ' form')
+    const sendingData = {
+      ...form, 
+      end_date: new Date(form.end_date).toISOString()
+    }
+    const response = await PostCall({data:form, url: "/api/repair"})
+    console.log(response);
   };
+
+  const handleChangeForm = (name:string, e:string) => {
+    setForm((prev)=>({...prev, [name]: e}))
+  }
 
   useEffect(() => {
     const loadUsers = async () => {
       const response = await fetch("/api/users");
 
-      const data = await response.json();
-      setUsers(data.data)
+      const {data} = await response.json();
+      setUsers(data)
     };
 
     loadUsers();
   }, []);
+
+  console.log(users, ' user')
 
 
   return (
@@ -202,41 +177,40 @@ const CreateRepair = () => {
 
                 <div className="grid gap-5 p-6 sm:grid-cols-2">
                   <UIInput
-                    id="vehicleName"
-                    name="vehicleName"
+                    id="name_vehicle"
+                    name="name_vehicle"
                     label="Vehicle name"
                     placeholder="e.g. Volvo FMX 540"
-                    value={vehicleName}
-                    onChange={(event) => setVehicleName(event.target.value)}
+                    value={form.name_vehicle}
+                    onChange={(event) => handleChangeForm("name_vehicle",event.target.value)}
                     required
                   />
 
                   <UIInput
-                    id="vehicleType"
-                    name="vehicleType"
+                    id="vehicle_type"
+                    name="vehicle_type"
                     label="Vehicle type"
                     placeholder="e.g. Dump Truck"
-                    value={vehicleType}
-                    onChange={(event) => setVehicleType(event.target.value)}
+                    value={form.vehicle_type}
+                    onChange={(event) => handleChangeForm("vehicle_type",event.target.value)}
                     required
                   />
-
                   <UIInput
-                    id="vehiclePlate"
-                    name="vehiclePlate"
+                    id="license_plate"
+                    name="license_plate"
                     label="License plate"
                     placeholder="e.g. ABC-742"
-                    value={vehiclePlate}
-                    onChange={(event) => setVehiclePlate(event.target.value)}
+                    value={form.license_plate}
+                    onChange={(event) => handleChangeForm("license_plate",event.target.value)}
                   />
 
                   <UIInput
-                    id="vehicleModel"
-                    name="vehicleModel"
+                    id="vehicle_model"
+                    name="vehicle_model"
                     label="Model / year"
                     placeholder="e.g. 2022"
-                    value={vehicleModel}
-                    onChange={(event) => setVehicleModel(event.target.value)}
+                    value={form.vehicle_model}
+                    onChange={(event) => handleChangeForm("vehicle_model",event.target.value)}
                   />
                 </div>
               </section>
@@ -268,8 +242,8 @@ const CreateRepair = () => {
                     name="title"
                     label="Repair title"
                     placeholder="e.g. Hydraulic system repair"
-                    value={title}
-                    onChange={(event) => setTitle(event.target.value)}
+                    value={form.title}
+                    onChange={(event) => handleChangeForm("title",event.target.value)}
                     required
                   />
 
@@ -285,8 +259,8 @@ const CreateRepair = () => {
                     <textarea
                       id="description"
                       name="description"
-                      value={description}
-                      onChange={(event) => setDescription(event.target.value)}
+                      value={form.description}
+                      onChange={(event) => handleChangeForm("description",event.target.value)}
                       placeholder="Describe the problem, symptoms and required work..."
                       rows={6}
                       required
@@ -324,7 +298,7 @@ const CreateRepair = () => {
                 </div>
 
                 <div className="grid gap-3 p-6 sm:grid-cols-2">
-                  {employees.map((employee) => {
+                  {users.map((employee) => {
                     const selected = selectedEmployees.includes(employee.id);
 
                     return (
@@ -378,47 +352,13 @@ const CreateRepair = () => {
                   />
 
                   <UIInput
-                    id="deadline"
-                    name="deadline"
+                    id="end_date"
+                    name="end_date"
                     type="date"
                     label="Deadline"
-                    value={deadline}
-                    onChange={(event) => setDeadline(event.target.value)}
+                    value={form.end_date}
+                    onChange={(event) => handleChangeForm("end_date", event.target.value)}
                     required
-                  />
-                </div>
-              </section>
-
-              {/* ============================================= */}
-              {/* COMMENT */}
-              {/* ============================================= */}
-
-              <section className="rounded-2xl border border-zinc-800 bg-[#111113]">
-                <div className="border-b border-zinc-800 px-6 py-5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">
-                      💬
-                    </div>
-
-                    <div>
-                      <h2 className="font-bold">Initial comment</h2>
-
-                      <p className="text-xs text-zinc-600">
-                        Add a message for the assigned employees.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-6">
-                  <textarea
-                    id="comment"
-                    name="comment"
-                    value={comment}
-                    onChange={(event) => setComment(event.target.value)}
-                    placeholder="Add any additional information for the employees..."
-                    rows={4}
-                    className="w-full resize-none rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm leading-6 text-zinc-200 outline-none transition placeholder:text-zinc-700 focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/10"
                   />
                 </div>
               </section>
@@ -472,26 +412,26 @@ const CreateRepair = () => {
 
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold">
-                          {vehicleName || "Vehicle name"}
+                          {form.name_vehicle || "Vehicle name"}
                         </p>
 
                         <p className="mt-1 truncate text-xs text-zinc-600">
-                          {vehicleType || "Vehicle type"}
+                          {form.vehicle_type || "Vehicle type"}
                         </p>
                       </div>
                     </div>
 
-                    {(vehiclePlate || vehicleModel) && (
+                    {(form.license_plate || form.vehicle_model) && (
                       <div className="mt-3 flex gap-2">
-                        {vehiclePlate && (
+                        {form.license_plate  && (
                           <span className="rounded-md bg-zinc-900 px-2 py-1 font-mono text-[10px] text-zinc-500">
-                            {vehiclePlate}
+                            {form.license_plate }
                           </span>
                         )}
 
-                        {vehicleModel && (
+                        {form.vehicle_model && (
                           <span className="rounded-md bg-zinc-900 px-2 py-1 text-[10px] text-zinc-500">
-                            {vehicleModel}
+                            {form.vehicle_model}
                           </span>
                         )}
                       </div>
@@ -505,12 +445,12 @@ const CreateRepair = () => {
                     </p>
 
                     <p className="mt-2 text-sm font-semibold">
-                      {title || "No repair title"}
+                      {form.title || "No repair title"}
                     </p>
 
-                    {description && (
+                    {form.description && (
                       <p className="mt-2 line-clamp-3 text-xs leading-5 text-zinc-600">
-                        {description}
+                        {form.description}
                       </p>
                     )}
                   </div>
@@ -532,7 +472,7 @@ const CreateRepair = () => {
                       <p className="text-xs text-zinc-600">Deadline</p>
 
                       <p className="mt-2 text-sm font-semibold">
-                        {deadline || "Not set"}
+                        {form.end_date || "Not set"}
                       </p>
                     </div>
                   </div>
@@ -554,7 +494,7 @@ const CreateRepair = () => {
                         </p>
                       ) : (
                         selectedEmployees.map((id) => {
-                          const employee = employees.find(
+                          const employee = users.find(
                             (item) => item.id === id,
                           );
 
@@ -568,11 +508,11 @@ const CreateRepair = () => {
                               className="flex items-center gap-2"
                             >
                               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/10 text-[9px] font-bold text-amber-500">
-                                {employee.initials}
+                                {employee.full_name}
                               </div>
 
                               <span className="text-xs text-zinc-400">
-                                {employee.name}
+                                {employee.full_name}
                               </span>
                             </div>
                           );

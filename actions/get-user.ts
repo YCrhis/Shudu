@@ -30,7 +30,9 @@ export const GetUser = async () => {
 export const GetAllUsers = async () => {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase.from("profiles").select("*");
+    const { data, error } = await supabase
+      .from("profiles")
+      .select(`*`);
     
     if (error) {
       return {
