@@ -10,6 +10,15 @@ import { RepairI } from "@/types/repair";
 import { PostCall } from "@/helpers/PostCall";
 import UIModalMessage from "@/components/modals/UIModalMessage";
 import { useRouter } from "next/navigation";
+import UIAlert from "@/components/UI/UIAlert";
+
+type AlertType = "good" | "bad";
+
+interface AlertState {
+  isOpen: boolean;
+  message: string;
+  type: AlertType;
+}
 
 const statusOptions = [
   {
@@ -43,12 +52,17 @@ const CreateRepair = () => {
     init_date: new Date().toISOString(),
     license_plate: "",
     vehicle_model: "",
+    status: "",
   });
 
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([]);
-  const router = useRouter()
+  const router = useRouter();
 
-  const [status, setStatus] = useState("pending");
+  const [alert, setAlert] = useState<AlertState>({
+    isOpen: false,
+    message: "",
+    type: "good",
+  });
 
   const toggleEmployee = (employeeId: string) => {
     setSelectedEmployees((current) =>
@@ -59,11 +73,25 @@ const CreateRepair = () => {
   };
 
   const handleGoInit = () => {
-    router.push("/in")
-  }
+    router.push("/in");
+  };
+
+  const validateForm = () => {
+    const valid = !Object.values(form).some((f) => f === "");
+    return valid;
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const badForm = validateForm();
+    if (badForm) {
+      setAlert({
+        isOpen: true,
+        message: "You forgot to complete the form.",
+        type: "bad",
+      });
+      return;
+    }
     const response = await PostCall({ data: form, url: "/api/repair" });
     if (response.success) {
       setModalOpen(true);
@@ -85,9 +113,15 @@ const CreateRepair = () => {
     loadUsers();
   }, []);
 
-
   return (
     <main className="min-h-screen bg-[#09090B] text-zinc-100">
+      <UIAlert
+        isOpen={alert.isOpen}
+        message={alert.message}
+        type={alert.type}
+        onClose={() => setAlert({message: "", type: "good", isOpen: false})}
+      />
+
       <UIModalMessage
         isOpen={modalOpen}
         onClose={() => handleGoInit()}
@@ -373,8 +407,10 @@ const CreateRepair = () => {
                     label="Initial status"
                     placeholder="Select a status"
                     options={statusOptions}
-                    value={status}
-                    onChange={(event) => setStatus(event.target.value)}
+                    value={form.status}
+                    onChange={(event) =>
+                      handleChangeForm("status", event.target.value)
+                    }
                     required
                   />
 
@@ -491,8 +527,9 @@ const CreateRepair = () => {
 
                       <p className="mt-2 text-sm font-semibold text-amber-400">
                         {
-                          statusOptions.find((item) => item.value === status)
-                            ?.label
+                          statusOptions.find(
+                            (item) => item.value === form.status,
+                          )?.label
                         }
                       </p>
                     </div>

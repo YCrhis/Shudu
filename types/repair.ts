@@ -9,8 +9,9 @@ export interface RepairI {
     vehicle_type: string;
     license_plate: string;
     vehicle_model:string;
-    init_date: string
-    end_date: string
+    init_date: string;
+    end_date: string;
+    status: string;
 }   
 
 export interface RepairAddedResponse {
