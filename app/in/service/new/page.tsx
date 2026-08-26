@@ -11,6 +11,7 @@ import { PostCall } from "@/helpers/PostCall";
 import UIModalMessage from "@/components/modals/UIModalMessage";
 import { useRouter } from "next/navigation";
 import UIAlert from "@/components/UI/UIAlert";
+import { InsertEmployeeRepair } from "@/actions/repair";
 
 type AlertType = "good" | "bad";
 
@@ -42,6 +43,8 @@ const statusOptions = [
 const CreateRepair = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
+
+  console.log(users, " u");
 
   const [form, setForm] = useState<RepairI>({
     name_vehicle: "",
@@ -77,7 +80,7 @@ const CreateRepair = () => {
   };
 
   const validateForm = () => {
-    const valid = !Object.values(form).some((f) => f === "");
+    const valid = Object.values(form).some((f) => f === "");
     return valid;
   };
 
@@ -92,8 +95,17 @@ const CreateRepair = () => {
       });
       return;
     }
-    const response = await PostCall({ data: form, url: "/api/repair" });
+    const response = await PostCall({
+      data: { ...form, typePost: "repair" },
+      url: "/api/repair",
+    });
     if (response.success) {
+      const id = response.data.id;
+      const dataToSend = { users, id, typePost: 'employee-repair' };
+      await PostCall({
+        data: dataToSend,
+        url: "/api/repair",
+      });
       setModalOpen(true);
     }
   };
@@ -119,7 +131,7 @@ const CreateRepair = () => {
         isOpen={alert.isOpen}
         message={alert.message}
         type={alert.type}
-        onClose={() => setAlert({message: "", type: "good", isOpen: false})}
+        onClose={() => setAlert({ message: "", type: "good", isOpen: false })}
       />
 
       <UIModalMessage

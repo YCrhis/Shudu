@@ -1,21 +1,24 @@
 import { createClient } from "@/supabase/server";
 import { RepairI } from "@/types/repair";
+import { User } from "@/types/user";
 
 export const InsertRepair = async (repair: RepairI) => {
   try {
-      console.log("REPAIR RECEIVED:", repair);
-    console.log("NAME VEHICLE:", repair.name_vehicle);
     const supabase = await createClient();
-    const { error } = await supabase.from("repair").insert({
-      name_vehicle: repair.name_vehicle,
-      title: repair.title,
-      description: repair.description,
-      vehicle_type: repair.vehicle_type,
-      license_plate: repair.license_plate,
-      vehicle_model: repair.vehicle_model,
-      init_date: repair.init_date,
-      end_date: repair.end_date,
-    });
+    const { error, data } = await supabase
+      .from("repair")
+      .insert({
+        name_vehicle: repair.name_vehicle,
+        title: repair.title,
+        description: repair.description,
+        vehicle_type: repair.vehicle_type,
+        license_plate: repair.license_plate,
+        vehicle_model: repair.vehicle_model,
+        init_date: repair.init_date,
+        end_date: repair.end_date,
+      })
+      .select("id")
+      .single();
 
     if (error) {
       return {
@@ -28,7 +31,8 @@ export const InsertRepair = async (repair: RepairI) => {
     return {
       success: true,
       message: "repair added successfully",
-      status: 201,
+      status: 200,
+      data: data,
     };
   } catch (error) {
     return {
@@ -37,4 +41,29 @@ export const InsertRepair = async (repair: RepairI) => {
       status: 400,
     };
   }
+};
+
+export const InsertEmployeeRepair = async (emp: User[], idRepair: string) => {
+  const supabase = await createClient();
+
+  const createBody = emp.map((e) => ({
+    repair_id: idRepair,
+    user_id: e.id,
+  }));
+
+  const { error } = await supabase.from("repair_employees").insert(createBody);
+
+    if (error) {
+      return {
+        success: false,
+        message: error.message,
+        status: 400,
+      };
+    }
+
+    return {
+      success: true,
+      message: "employee added to repair successfully",
+      status: 201,
+    };
 };
