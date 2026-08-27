@@ -102,7 +102,6 @@ console.log(repairs, ' repairs');
     loadInfo();
   }, []);
 
-  console.log(repairs, ' repairs');
 
   const filteredRepairs = useMemo(() => {
     return repairs.filter((repair) =>{

@@ -16,6 +16,7 @@ export const InsertRepair = async (repair: RepairI) => {
         vehicle_model: repair.vehicle_model,
         init_date: repair.init_date,
         end_date: repair.end_date,
+        status: repair.status,
       })
       .select("id")
       .single();

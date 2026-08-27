@@ -11,6 +11,7 @@ import { PostCall } from "@/helpers/PostCall";
 import UIModalMessage from "@/components/modals/UIModalMessage";
 import { useRouter } from "next/navigation";
 import UIAlert from "@/components/UI/UIAlert";
+import { statusOptions } from "@/helpers/data";
 
 type AlertType = "good" | "bad";
 
@@ -20,24 +21,6 @@ interface AlertState {
   type: AlertType;
 }
 
-const statusOptions = [
-  {
-    value: "pending",
-    label: "Pending",
-  },
-  {
-    value: "in_progress",
-    label: "In progress",
-  },
-  {
-    value: "completed",
-    label: "Completed",
-  },
-  {
-    value: "cancelled",
-    label: "Cancelled",
-  },
-];
 
 const CreateRepair = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -110,6 +93,7 @@ const CreateRepair = () => {
   const handleChangeForm = (name: string, e: string) => {
     setForm((prev) => ({ ...prev, [name]: e }));
   };
+  console.log(form, ' form')
 
   useEffect(() => {
     const loadUsers = async () => {
