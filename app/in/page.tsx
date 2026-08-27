@@ -1,9 +1,19 @@
-'use client'
+"use client";
 
-import { useState } from "react";
+import UIInput from "@/components/UI/UIInput";
+import UIStatus from "@/components/UI/UIStatus";
+import { RepairI } from "@/types/repair";
+import { useEffect, useMemo, useState } from "react";
 
 const Dashboard = () => {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState({
+    id: "",
+    name_vehicle: "",
+    employee: "",
+    type: "",
+  });
+  const [users, setUsers] = useState(0);
+  const [repairs, setRepairs] = useState<RepairI[]>([]);
 
   const summary = [
     {
@@ -25,8 +35,8 @@ const Dashboard = () => {
       icon: "🔧",
     },
   ];
-
-  const repairs = [
+console.log(repairs, ' repairs');
+  /* const repairs = [
     {
       id: "REP-00124",
       vehicle: "Volvo FMX 540",
@@ -67,13 +77,45 @@ const Dashboard = () => {
       date: "Aug 18, 2026",
       status: "Completed",
     },
-  ];
+  ]; */
 
-  const filteredRepairs = repairs.filter((repair) =>
-    `${repair.id} ${repair.vehicle} ${repair.employee} ${repair.type}`
+  /* const filteredRepairs = [] repairs.filter((repair) =>
+    `${repair.id} ${repair.name_vehicle} ${repair.employee} ${repair.type}`
       .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+      .includes(search.toLowerCase()),
+  ); */
+
+  const handleChange = (name:string, value: string) => {
+    setSearch((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  }
+
+  useEffect(() => {
+    const loadInfo = async () => {
+      const response = await fetch("/api/dashboard");
+      const {users, repairs} = await response.json();
+      setUsers(users);
+      setRepairs(repairs.data);
+    };
+    loadInfo();
+  }, []);
+
+  console.log(repairs, ' repairs');
+
+  const filteredRepairs = useMemo(() => {
+    return repairs.filter((repair) =>{
+      const searchId = search.id.toLowerCase();
+      const searchNameVehicle = search.name_vehicle.toLowerCase();
+      const searchEmployee = search.employee.toLowerCase();
+      const searchType = search.type.toLowerCase();
+
+      return {searchId, searchNameVehicle, searchEmployee, searchType};
+    })
+  },[search, repairs]);
+
+  console.log(filteredRepairs, ' filteredRepairs');
 
   return (
     <main className="min-h-screen bg-[#09090B] text-zinc-100">
@@ -86,9 +128,7 @@ const Dashboard = () => {
             </div>
 
             <div>
-              <p className="text-sm font-bold tracking-wide">
-                VEHICLE WORKS
-              </p>
+              <p className="text-sm font-bold tracking-wide">VEHICLE WORKS</p>
 
               <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">
                 Maintenance System
@@ -111,13 +151,9 @@ const Dashboard = () => {
               </div>
 
               <div>
-                <p className="text-sm font-medium">
-                  Juan Pérez
-                </p>
+                <p className="text-sm font-medium">Juan Pérez</p>
 
-                <p className="text-xs text-zinc-600">
-                  Administrator
-                </p>
+                <p className="text-xs text-zinc-600">Administrator</p>
               </div>
             </div>
 
@@ -193,9 +229,7 @@ const Dashboard = () => {
           <div className="border-b border-zinc-800 p-5 sm:p-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <h2 className="text-lg font-bold">
-                  Recent repairs
-                </h2>
+                <h2 className="text-lg font-bold">Recent repairs</h2>
 
                 <p className="mt-1 text-sm text-zinc-600">
                   Latest vehicle maintenance records
@@ -204,18 +238,10 @@ const Dashboard = () => {
 
               {/* Search */}
               <div className="relative w-full lg:w-80">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600">
-                  ⌕
-                </span>
-
-                <input
-                  type="text"
-                  value={search}
+                <UIInput
                   onChange={(event) =>
-                    setSearch(event.target.value)
-                  }
-                  placeholder="Search repairs..."
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950 py-2.5 pl-9 pr-4 text-sm text-zinc-200 outline-none transition placeholder:text-zinc-700 focus:border-amber-500/50 focus:ring-2 focus:ring-amber-500/10"
+                      handleChange("name_vehicle", event.target.value)
+                    }
                 />
               </div>
             </div>
@@ -278,7 +304,7 @@ const Dashboard = () => {
 
                         <div>
                           <p className="text-sm font-semibold text-zinc-200">
-                            {repair.vehicle}
+                            {repair.name_vehicle}
                           </p>
 
                           <p className="mt-0.5 text-xs text-zinc-600">
@@ -290,52 +316,31 @@ const Dashboard = () => {
 
                     {/* Repair */}
                     <td className="px-6 py-5">
-                      <p className="text-sm text-zinc-300">
-                        {repair.type}
-                      </p>
+                      <p className="text-sm text-zinc-300">{repair.vehicle_type}</p>
                     </td>
 
                     {/* Employee */}
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-2.5">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-[10px] font-bold text-zinc-400">
-                          {repair.employee
-                            .split(" ")
-                            .map((name) => name[0])
-                            .join("")
-                            .slice(0, 2)}
-                        </div>
+                        {repair.repair_employees?.map((emp)=>{
+                          const employee = emp.profiles?.full_name.split(" ").map((name) => name[0]).join("").slice(0, 2)
+                          return (<div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-[10px] font-bold text-zinc-400" key={emp.profiles.id}>{employee}</div>)
+                        })}
 
                         <span className="text-sm text-zinc-300">
-                          {repair.employee}
+                          {repair.repair_employees?.map((employee) => employee?.profiles?.full_name).join(", ")}
                         </span>
                       </div>
                     </td>
 
                     {/* Date */}
                     <td className="px-6 py-5 text-sm text-zinc-500">
-                      {repair.date}
+                      {repair.init_date}
                     </td>
 
                     {/* Status */}
                     <td className="px-6 py-5">
-                      <span
-                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
-                          repair.status === "Completed"
-                            ? "bg-green-500/10 text-green-400"
-                            : "bg-amber-500/10 text-amber-400"
-                        }`}
-                      >
-                        <span
-                          className={`h-1.5 w-1.5 rounded-full ${
-                            repair.status === "Completed"
-                              ? "bg-green-400"
-                              : "bg-amber-400"
-                          }`}
-                        />
-
-                        {repair.status}
-                      </span>
+                      <UIStatus status={repair?.status?.toLowerCase() as "pending" | "in_progress" | "completed" | "cancelled"} />
                     </td>
 
                     {/* Action */}
@@ -349,10 +354,7 @@ const Dashboard = () => {
 
                 {filteredRepairs.length === 0 && (
                   <tr>
-                    <td
-                      colSpan={7}
-                      className="px-6 py-16 text-center"
-                    >
+                    <td colSpan={7} className="px-6 py-16 text-center">
                       <p className="text-sm font-medium text-zinc-400">
                         No repairs found
                       </p>

@@ -53,17 +53,47 @@ export const InsertEmployeeRepair = async (emp: User[], idRepair: string) => {
 
   const { error } = await supabase.from("repair_employees").insert(createBody);
 
-    if (error) {
-      return {
-        success: false,
-        message: error.message,
-        status: 400,
-      };
-    }
-
+  if (error) {
     return {
-      success: true,
-      message: "employee added to repair successfully",
-      status: 201,
+      success: false,
+      message: error.message,
+      status: 400,
     };
+  }
+
+  return {
+    success: true,
+    message: "employee added to repair successfully",
+    status: 201,
+  };
+};
+
+export const ListRepairs = async () => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("repair").select(`
+  *,
+  repair_employees (
+    profiles(
+      id,
+      email,
+      full_name,
+      avatar_url
+    )
+  )
+`);
+
+  if (error) {
+    return {
+      success: false,
+      message: error.message,
+      status: 400,
+    };
+  }
+
+  return {
+    success: true,
+    message: "ok",
+    status: 200,
+    data,
+  };
 };

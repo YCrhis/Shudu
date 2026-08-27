@@ -11,7 +11,6 @@ import { PostCall } from "@/helpers/PostCall";
 import UIModalMessage from "@/components/modals/UIModalMessage";
 import { useRouter } from "next/navigation";
 import UIAlert from "@/components/UI/UIAlert";
-import { InsertEmployeeRepair } from "@/actions/repair";
 
 type AlertType = "good" | "bad";
 
@@ -43,8 +42,6 @@ const statusOptions = [
 const CreateRepair = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
-
-  console.log(users, " u");
 
   const [form, setForm] = useState<RepairI>({
     name_vehicle: "",
