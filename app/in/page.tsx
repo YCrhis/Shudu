@@ -1,7 +1,9 @@
 "use client";
 
 import UIInput from "@/components/UI/UIInput";
+import UISelect from "@/components/UI/UISelect";
 import UIStatus from "@/components/UI/UIStatus";
+import { statusOptions } from "@/helpers/data";
 import { RepairI } from "@/types/repair";
 import { useEffect, useMemo, useState } from "react";
 
@@ -10,7 +12,7 @@ const Dashboard = () => {
     id: "",
     name_vehicle: "",
     employee: "",
-    type: "",
+    status: "",
   });
   const [users, setUsers] = useState(0);
   const [repairs, setRepairs] = useState<RepairI[]>([]);
@@ -35,86 +37,57 @@ const Dashboard = () => {
       icon: "🔧",
     },
   ];
-console.log(repairs, ' repairs');
-  /* const repairs = [
-    {
-      id: "REP-00124",
-      vehicle: "Volvo FMX 540",
-      type: "Hydraulic system",
-      employee: "Juan Pérez",
-      date: "Aug 22, 2026",
-      status: "Completed",
-    },
-    {
-      id: "REP-00123",
-      vehicle: "Caterpillar 740",
-      type: "Brake system",
-      employee: "Carlos Mendoza",
-      date: "Aug 21, 2026",
-      status: "Completed",
-    },
-    {
-      id: "REP-00122",
-      vehicle: "Scania XT",
-      type: "Oil change",
-      employee: "Miguel Torres",
-      date: "Aug 20, 2026",
-      status: "Completed",
-    },
-    {
-      id: "REP-00121",
-      vehicle: "Komatsu HD785",
-      type: "Engine maintenance",
-      employee: "Luis Ramírez",
-      date: "Aug 19, 2026",
-      status: "In progress",
-    },
-    {
-      id: "REP-00120",
-      vehicle: "Mercedes-Benz Arocs",
-      type: "Electrical system",
-      employee: "Pedro Castillo",
-      date: "Aug 18, 2026",
-      status: "Completed",
-    },
-  ]; */
 
-  /* const filteredRepairs = [] repairs.filter((repair) =>
-    `${repair.id} ${repair.name_vehicle} ${repair.employee} ${repair.type}`
-      .toLowerCase()
-      .includes(search.toLowerCase()),
-  ); */
-
-  const handleChange = (name:string, value: string) => {
+  const handleChange = (name: string, value: string) => {
+    console.log(name, value,  ' v')
     setSearch((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-  }
+  };
+
+  const cleanSearch = () => {
+    setSearch({ employee: "", id: "", name_vehicle: "", status: "" });
+  };
 
   useEffect(() => {
     const loadInfo = async () => {
       const response = await fetch("/api/dashboard");
-      const {users, repairs} = await response.json();
+      const { users, repairs } = await response.json();
       setUsers(users);
       setRepairs(repairs.data);
     };
     loadInfo();
   }, []);
 
-
   const filteredRepairs = useMemo(() => {
-    return repairs.filter((repair) =>{
-      const searchId = search.id.toLowerCase();
-      const searchNameVehicle = search.name_vehicle.toLowerCase();
-      const searchEmployee = search.employee.toLowerCase();
-      const searchType = search.type.toLowerCase();
+    return repairs.filter((repair) => {
+      const matchesId =
+        !search.id || String(repair.id).includes(String(search.id));
 
-      return {searchId, searchNameVehicle, searchEmployee, searchType};
-    })
-  },[search, repairs]);
+      const matchesVehicle =
+        !search.name_vehicle ||
+        repair.name_vehicle
+          .toLowerCase()
+          .includes(search.name_vehicle.toLowerCase());
 
-  console.log(filteredRepairs, ' filteredRepairs');
+      const matchesEmployee =
+        !search.employee ||
+        (repair.repair_employees ?? []).some((e) =>
+          e.profiles.full_name
+            .toLowerCase()
+            .includes(search.employee.toLowerCase()),
+        );
+
+      const matchesType =
+        !search.status ||
+        repair.status.includes(search.status.toLowerCase());
+
+      return matchesId && matchesVehicle && matchesEmployee && matchesType;
+    });
+  }, [search, repairs]);
+
+  console.log(search, " search");
 
   return (
     <main className="min-h-screen bg-[#09090B] text-zinc-100">
@@ -236,19 +209,44 @@ console.log(repairs, ' repairs');
               </div>
 
               {/* Search */}
-              <div className="relative w-full lg:w-80">
+              <div className="relative w-full lg:w-220 flex items-center gap-4">
                 <UIInput
+                  className="w-75"
+                  label="Search employee"
+                  value={search.employee}
                   onChange={(event) =>
-                      handleChange("name_vehicle", event.target.value)
-                    }
+                    handleChange("employee", event.target.value)
+                  }
                 />
+                <UIInput
+                  className="w-75"
+                  label="Search vehicle"
+                  value={search.name_vehicle}
+                  onChange={(event) =>
+                    handleChange("name_vehicle", event.target.value)
+                  }
+                />
+                <UISelect
+                  label="Search by status"
+                  options={statusOptions}
+                  value={search.status}
+                  onChange={(event) =>
+                    handleChange("status", event.target.value)
+                  }
+                />
+                <div
+                  className="bg-[#09090B]/90 w-50 h-10 flex border items-center justify-center rounded-md cursor-pointer"
+                  onClick={cleanSearch}
+                >
+                  🗑
+                </div>
               </div>
             </div>
           </div>
 
           {/* Table */}
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-left">
+            <table className="w-full min-w-225 text-left">
               <thead>
                 <tr className="border-b border-zinc-800 bg-zinc-950/50">
                   <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-zinc-600">
@@ -315,19 +313,34 @@ console.log(repairs, ' repairs');
 
                     {/* Repair */}
                     <td className="px-6 py-5">
-                      <p className="text-sm text-zinc-300">{repair.vehicle_type}</p>
+                      <p className="text-sm text-zinc-300">
+                        {repair.vehicle_type}
+                      </p>
                     </td>
 
                     {/* Employee */}
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-2.5">
-                        {repair.repair_employees?.map((emp)=>{
-                          const employee = emp.profiles?.full_name.split(" ").map((name) => name[0]).join("").slice(0, 2)
-                          return (<div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-[10px] font-bold text-zinc-400" key={emp.profiles.id}>{employee}</div>)
+                        {repair.repair_employees?.map((emp) => {
+                          const employee = emp.profiles?.full_name
+                            .split(" ")
+                            .map((name) => name[0])
+                            .join("")
+                            .slice(0, 2);
+                          return (
+                            <div
+                              className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-800 text-[10px] font-bold text-zinc-400"
+                              key={emp.profiles.id}
+                            >
+                              {employee}
+                            </div>
+                          );
                         })}
 
                         <span className="text-sm text-zinc-300">
-                          {repair.repair_employees?.map((employee) => employee?.profiles?.full_name).join(", ")}
+                          {repair.repair_employees
+                            ?.map((employee) => employee?.profiles?.full_name)
+                            .join(", ")}
                         </span>
                       </div>
                     </td>
@@ -339,7 +352,15 @@ console.log(repairs, ' repairs');
 
                     {/* Status */}
                     <td className="px-6 py-5">
-                      <UIStatus status={repair?.status?.toLowerCase() as "pending" | "in_progress" | "completed" | "cancelled"} />
+                      <UIStatus
+                        status={
+                          repair?.status?.toLowerCase() as
+                            | "pending"
+                            | "in_progress"
+                            | "completed"
+                            | "cancelled"
+                        }
+                      />
                     </td>
 
                     {/* Action */}
