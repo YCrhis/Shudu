@@ -5,6 +5,7 @@ import UISelect from "@/components/UI/UISelect";
 import UIStatus from "@/components/UI/UIStatus";
 import { statusOptions } from "@/helpers/data";
 import { RepairI } from "@/types/repair";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 const Dashboard = () => {
@@ -17,6 +18,7 @@ const Dashboard = () => {
   const [users, setUsers] = useState(0);
   const [repairs, setRepairs] = useState<RepairI[]>([]);
 
+
   const summary = [
     {
       label: "Total vehicles",
@@ -26,13 +28,13 @@ const Dashboard = () => {
     },
     {
       label: "Employees",
-      value: "18",
+      value: users,
       description: "Active employees",
       icon: "👷",
     },
     {
       label: "Repairs",
-      value: "126",
+      value: repairs.length,
       description: "Registered repairs",
       icon: "🔧",
     },
@@ -155,10 +157,10 @@ const Dashboard = () => {
               </p>
             </div>
 
-            <button className="flex w-fit items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-sm font-bold text-black transition hover:bg-amber-400">
+            <Link href={"/in/service/new"} className="flex w-fit items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-sm font-bold text-black transition hover:bg-amber-400">
               <span className="text-lg">+</span>
               New repair
-            </button>
+            </Link>
           </div>
         </div>
 
