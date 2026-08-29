@@ -1,5 +1,4 @@
 import { InsertEmployeeRepair, InsertRepair } from "@/actions/repair";
-import { RepairI } from "@/types/repair";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -18,4 +17,13 @@ export async function POST(request: Request) {
       break;
   }
   return NextResponse.json(response);
+}
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+
+  return Response.json({ id });
 }

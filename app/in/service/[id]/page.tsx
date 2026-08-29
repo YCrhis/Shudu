@@ -1,9 +1,21 @@
 'use client'
 
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const RepairDetail = () => {
   const [message, setMessage] = useState("");
+  const params = useSearchParams();
+  const id = params.get("id");
+
+
+  useEffect(()=>{
+    const lodInformation = async() => {
+        const response = await fetch(`/api/repair/${id}`);
+        console.log(response)
+    }
+    lodInformation();
+  },[])
 
   const repair = {
     id: "REP-00124",

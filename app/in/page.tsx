@@ -41,7 +41,6 @@ const Dashboard = () => {
   ];
 
   const handleChange = (name: string, value: string) => {
-    console.log(name, value,  ' v')
     setSearch((prev) => ({
       ...prev,
       [name]: value,

@@ -98,3 +98,39 @@ export const ListRepairs = async () => {
     data,
   };
 };
+
+export const DetailRepairs = async (id: number) => {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("repair")
+    .select(
+      `
+        *,
+        repair_employees (
+          profiles(
+            id,
+            email,
+            full_name,
+            avatar_url
+          )
+        )
+      `,
+    )
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    return {
+      success: false,
+      message: error.message,
+      status: 400,
+    };
+  }
+
+  return {
+    success: true,
+    message: "ok",
+    status: 200,
+    data,
+  };
+};
