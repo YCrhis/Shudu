@@ -134,3 +134,45 @@ export const DetailRepairs = async (id: string) => {
     data,
   };
 };
+
+
+export const UpdateRepair = async (repair: RepairI) => {
+  try {
+    const supabase = await createClient();
+    const { error, data } = await supabase
+      .from("repair")
+      .update({
+        name_vehicle: repair.name_vehicle,
+        title: repair.title,
+        description: repair.description,
+        vehicle_type: repair.vehicle_type,
+        license_plate: repair.license_plate,
+        vehicle_model: repair.vehicle_model,
+        init_date: repair.init_date,
+        end_date: repair.end_date,
+        status: repair.status,
+      })
+      .eq("id", repair.id);
+
+    if (error) {
+      return {
+        success: false,
+        message: error.message,
+        status: 400,
+      };
+    }
+
+    return {
+      success: true,
+      message: "repair updated successfully",
+      status: 200,
+      data: data,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error,
+      status: 400,
+    };
+  }
+};

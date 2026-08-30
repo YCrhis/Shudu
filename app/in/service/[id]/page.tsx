@@ -1,5 +1,6 @@
 "use client";
 
+import UpdateForm from "@/components/repair/UpdateForm";
 import { formatDate } from "@/helpers/dateFormat";
 import { GetCall } from "@/helpers/GetCall";
 import { GetInitials } from "@/helpers/stringFormat";
@@ -9,16 +10,16 @@ import { useEffect, useState } from "react";
 
 const RepairDetail = () => {
   const [message, setMessage] = useState("");
-  const [repairDetail, setRepairDetail] = useState<RepairI|null>(null);
+  const [repairDetail, setRepairDetail] = useState<RepairI | null>(null);
   const [loading, setLoading] = useState(false);
   const params = useParams();
   const id = params.id;
 
   useEffect(() => {
-    setLoading(true)
+    setLoading(true);
     const lodInformation = async () => {
-      const {data} = await GetCall({ url: `/api/repair/${id}` });
-      setRepairDetail(data)
+      const { data } = await GetCall({ url: `/api/repair/${id}` });
+      setRepairDetail(data);
     };
     lodInformation();
     setLoading(false);
@@ -92,7 +93,9 @@ const RepairDetail = () => {
               </span>
             </div>
 
-            <p className="mt-2 font-mono text-sm text-zinc-600">{repairDetail?.id}</p>
+            <p className="mt-2 font-mono text-sm text-zinc-600">
+              {repairDetail?.id}
+            </p>
           </div>
 
           <button className="w-fit rounded-xl border border-zinc-800 px-5 py-3 text-sm font-semibold text-zinc-300 transition hover:border-zinc-700 hover:bg-zinc-900">
@@ -138,7 +141,7 @@ const RepairDetail = () => {
                     <p className="text-xs text-zinc-600">Deadline</p>
 
                     <p className="mt-2 text-sm font-semibold text-amber-400">
-                       {formatDate(repairDetail?.end_date || "")}
+                      {formatDate(repairDetail?.end_date || "")}
                     </p>
                   </div>
 
@@ -228,7 +231,7 @@ const RepairDetail = () => {
               </div>
 
               <div className="grid gap-3 p-6 sm:grid-cols-2">
-                {repairDetail?.repair_employees?.map(({profiles}) => (
+                {repairDetail?.repair_employees?.map(({ profiles }) => (
                   <div
                     key={profiles.full_name}
                     className="flex items-center gap-4 rounded-xl border border-zinc-800 bg-zinc-950 p-4"
@@ -238,7 +241,9 @@ const RepairDetail = () => {
                     </div>
 
                     <div>
-                      <p className="text-sm font-semibold">{profiles.full_name}</p>
+                      <p className="text-sm font-semibold">
+                        {profiles.full_name}
+                      </p>
 
                       <p className="mt-1 text-xs text-zinc-600">
                         {profiles.role}
@@ -250,7 +255,11 @@ const RepairDetail = () => {
             </section>
           </div>
 
-          
+          {repairDetail && (
+            <div>
+              <UpdateForm detailRepair={repairDetail} />
+            </div>
+          )}
         </div>
       </div>
     </main>

@@ -93,7 +93,6 @@ const CreateRepair = () => {
   const handleChangeForm = (name: string, e: string) => {
     setForm((prev) => ({ ...prev, [name]: e }));
   };
-  console.log(form, ' form')
 
   useEffect(() => {
     const loadUsers = async () => {
