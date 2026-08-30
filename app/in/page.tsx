@@ -88,7 +88,6 @@ const Dashboard = () => {
     });
   }, [search, repairs]);
 
-  console.log(search, " search");
 
   return (
     <main className="min-h-screen bg-[#09090B] text-zinc-100">
@@ -321,9 +320,9 @@ const Dashboard = () => {
 
                     {/* Action */}
                     <td className="px-6 py-5 text-right">
-                      <button className="rounded-lg border border-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-400 transition hover:border-amber-500/30 hover:bg-amber-500/5 hover:text-amber-400">
+                      <Link href={`/in/service/${repair.id}`} className="rounded-lg border border-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-400 transition hover:border-amber-500/30 hover:bg-amber-500/5 hover:text-amber-400">
                         View detail
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))}

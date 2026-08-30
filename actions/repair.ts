@@ -99,7 +99,7 @@ export const ListRepairs = async () => {
   };
 };
 
-export const DetailRepairs = async (id: number) => {
+export const DetailRepairs = async (id: string) => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("repair")
