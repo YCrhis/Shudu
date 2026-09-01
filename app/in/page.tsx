@@ -18,7 +18,6 @@ const Dashboard = () => {
   const [users, setUsers] = useState(0);
   const [repairs, setRepairs] = useState<RepairI[]>([]);
 
-
   const summary = [
     {
       label: "Total vehicles",
@@ -81,13 +80,11 @@ const Dashboard = () => {
         );
 
       const matchesType =
-        !search.status ||
-        repair.status.includes(search.status.toLowerCase());
+        !search.status || repair.status.includes(search.status.toLowerCase());
 
       return matchesId && matchesVehicle && matchesEmployee && matchesType;
     });
   }, [search, repairs]);
-
 
   return (
     <main className="min-h-screen bg-[#09090B] text-zinc-100">
@@ -110,10 +107,22 @@ const Dashboard = () => {
               </p>
             </div>
 
-            <Link href={"/in/service/new"} className="flex w-fit items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-sm font-bold text-black transition hover:bg-amber-400">
-              <span className="text-lg">+</span>
-              New repair
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link
+                href={"/in/service/new"}
+                className="flex w-fit items-center gap-2 rounded-xl bg-amber-500 px-5 py-3 text-sm font-bold text-black transition hover:bg-amber-400"
+              >
+                <span className="text-lg">+</span>
+                New repair
+              </Link>
+
+              <Link
+                href={"/in/service/new"}
+                className="flex w-fit items-center gap-2 rounded-xl bg-amber-500 px-5 py-4 text-sm font-bold text-black transition hover:bg-amber-400"
+              >
+                Users
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -320,7 +329,10 @@ const Dashboard = () => {
 
                     {/* Action */}
                     <td className="px-6 py-5 text-right">
-                      <Link href={`/in/service/${repair.id}`} className="rounded-lg border border-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-400 transition hover:border-amber-500/30 hover:bg-amber-500/5 hover:text-amber-400">
+                      <Link
+                        href={`/in/service/${repair.id}`}
+                        className="rounded-lg border border-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-400 transition hover:border-amber-500/30 hover:bg-amber-500/5 hover:text-amber-400"
+                      >
                         View detail
                       </Link>
                     </td>

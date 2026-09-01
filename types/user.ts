@@ -6,4 +6,6 @@ export interface User {
   area_id: string | null;
   created_at: string;
   role: string;
+  status: string;
+  repair_employees?: []
 }

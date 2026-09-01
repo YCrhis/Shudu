@@ -30,10 +30,25 @@ export const GetUser = async () => {
 export const GetAllUsers = async () => {
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("profiles")
-      .select(`*`);
-    
+    const { data, error } = await supabase.from("profiles").select(`
+        *,
+        repair_employees (
+          repair_id,
+          user_id,
+          repair (
+            id,
+            name_vehicle,
+            title,
+            description,
+            vehicle_type,
+            license_plate,
+            vehicle_model,
+            init_date,
+            end_date
+          )
+        )
+      `);
+
     if (error) {
       return {
         success: false,
@@ -44,9 +59,9 @@ export const GetAllUsers = async () => {
 
     return {
       success: true,
-      message: "repair added successfully",
-      status: 201,
-      data
+      message: "OK",
+      status: 200,
+      data,
     };
   } catch (error) {
     return {

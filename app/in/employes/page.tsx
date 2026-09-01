@@ -1,60 +1,24 @@
 'use client'
 
-import { useState } from "react";
+import { GetCall } from "@/helpers/GetCall";
+import { User } from "@/types/user";
+import { useEffect, useState } from "react";
 
 const Employees = () => {
   const [search, setSearch] = useState("");
+  const [users, setUsers] = useState<User[]>([])
 
-  const employees = [
-    {
-      id: 1,
-      name: "Juan Pérez",
-      role: "Lead Mechanic",
-      hiredAt: "March 12, 2022",
-      vehicles: 34,
-      repairs: 48,
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Carlos Mendoza",
-      role: "Hydraulic Technician",
-      hiredAt: "July 08, 2023",
-      vehicles: 27,
-      repairs: 39,
-      status: "Active",
-    },
-    {
-      id: 3,
-      name: "Miguel Torres",
-      role: "Mechanic",
-      hiredAt: "January 19, 2024",
-      vehicles: 21,
-      repairs: 31,
-      status: "Active",
-    },
-    {
-      id: 4,
-      name: "Luis Ramírez",
-      role: "Heavy Equipment Technician",
-      hiredAt: "September 04, 2021",
-      vehicles: 41,
-      repairs: 57,
-      status: "Active",
-    },
-    {
-      id: 5,
-      name: "Pedro Castillo",
-      role: "Electrical Technician",
-      hiredAt: "November 15, 2024",
-      vehicles: 13,
-      repairs: 19,
-      status: "Inactive",
-    },
-  ];
+  const loadUsers = async() => {
+    const {data} = await GetCall({url: `/api/users`});
+    setUsers(data);
+  }
 
-  const filteredEmployees = employees.filter((employee) =>
-    `${employee.name} ${employee.role}`
+  useEffect(()=>{
+    loadUsers();
+  },[])
+
+  const filteredEmployees = users.filter((employee) =>
+    `${employee.full_name} ${employee.role}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );
@@ -69,48 +33,7 @@ const Employees = () => {
 
   return (
     <main className="min-h-screen bg-[#09090B] text-zinc-100">
-      {/* Header */}
-      <header className="sticky top-0 z-30 border-b border-zinc-800/80 bg-[#09090B]/90 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-[1600px] items-center justify-between px-6 py-4 lg:px-8">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-black">
-              <span className="text-lg font-black">
-                V
-              </span>
-            </div>
 
-            <div>
-              <p className="text-sm font-bold tracking-wide">
-                VEHICLE WORKS
-              </p>
-
-              <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-600">
-                Maintenance System
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="hidden text-right sm:block">
-              <p className="text-sm font-medium">
-                Pedro García
-              </p>
-
-              <p className="text-xs text-zinc-600">
-                Administrator
-              </p>
-            </div>
-
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-500/10 text-sm font-bold text-amber-500">
-              PG
-            </div>
-
-            <button className="rounded-lg border border-zinc-800 px-3 py-2 text-sm text-zinc-500 transition hover:border-zinc-700 hover:text-zinc-200">
-              Logout
-            </button>
-          </div>
-        </div>
-      </header>
 
       {/* Content */}
       <div className="mx-auto max-w-[1600px] px-6 py-8 lg:px-8">
@@ -146,9 +69,6 @@ const Employees = () => {
             </p>
           </div>
 
-          <button className="w-fit rounded-xl bg-amber-500 px-5 py-3 text-sm font-bold text-black transition hover:bg-amber-400">
-            + Add employee
-          </button>
         </div>
 
         {/* Quick stats */}
@@ -257,12 +177,12 @@ const Employees = () => {
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-500/10 text-xs font-bold text-amber-500">
-                          {getInitials(employee.name)}
+                          {getInitials(employee.full_name)}
                         </div>
 
                         <div>
                           <p className="text-sm font-semibold text-zinc-200">
-                            {employee.name}
+                            {employee.full_name}
                           </p>
 
                           <p className="mt-1 text-xs text-zinc-600">
@@ -275,7 +195,7 @@ const Employees = () => {
                     {/* Date */}
                     <td className="px-6 py-5">
                       <p className="text-sm text-zinc-400">
-                        {employee.hiredAt}
+                        date
                       </p>
                     </td>
 
@@ -283,7 +203,7 @@ const Employees = () => {
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-zinc-200">
-                          {employee.vehicles}
+                          {employee?.repair_employees?.length}
                         </span>
 
                         <span className="text-xs text-zinc-600">
@@ -296,7 +216,7 @@ const Employees = () => {
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-zinc-200">
-                          {employee.repairs}
+                          {employee.repair_employees?.length}
                         </span>
 
                         <span className="text-xs text-zinc-600">
