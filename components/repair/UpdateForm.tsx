@@ -22,7 +22,6 @@ const UpdateForm = ({detailRepair}: Props) => {
 
   const handleUpdateRepair = async() => {
     const response = await PostCall({url: `/api/repair/${detailRepair.id}`, data: form , type:"PUT"})
-    console.log(response);
   }
 
   return (

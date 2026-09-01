@@ -1,5 +1,6 @@
 "use client";
 
+import UIUpdateRepairModal from "@/components/modals/UIUpdateRepairModal";
 import UpdateForm from "@/components/repair/UpdateForm";
 import { formatDate } from "@/helpers/dateFormat";
 import { GetCall } from "@/helpers/GetCall";
@@ -9,64 +10,34 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const RepairDetail = () => {
-  const [message, setMessage] = useState("");
   const [repairDetail, setRepairDetail] = useState<RepairI | null>(null);
   const [loading, setLoading] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
   const params = useParams();
   const id = params.id;
 
-  useEffect(() => {
+  const lodInformation = async () => {
     setLoading(true);
-    const lodInformation = async () => {
-      const { data } = await GetCall({ url: `/api/repair/${id}` });
-      setRepairDetail(data);
-    };
-    lodInformation();
+    const { data } = await GetCall({ url: `/api/repair/${id}` });
+    setRepairDetail(data);
     setLoading(false);
+  };
+
+  useEffect(() => {
+    lodInformation();
   }, []);
-
-  const repair = {
-    id: "REP-00124",
-    status: "In progress",
-    vehicle: {
-      name: "Volvo FMX 540",
-      plate: "ABC-742",
-      type: "Dump Truck",
-      year: "2022",
-      description:
-        "Heavy-duty dump truck used for transporting construction materials and aggregates.",
-    },
-    repair: {
-      title: "Hydraulic system repair",
-      description:
-        "The vehicle presented a hydraulic pressure problem during operation. The dump body was not reaching the required lifting height and the hydraulic system showed intermittent pressure loss.",
-      createdAt: "August 20, 2026",
-      deadline: "August 25, 2026",
-    },
-    workers: [
-      {
-        name: "Juan Pérez",
-        role: "Lead mechanic",
-        initials: "JP",
-      },
-      {
-        name: "Carlos Mendoza",
-        role: "Hydraulic technician",
-        initials: "CM",
-      },
-    ],
-  };
-
-  const handleSendMessage = () => {
-    if (!message.trim()) return;
-
-    console.log(message);
-
-    setMessage("");
-  };
 
   return (
     <main className="min-h-screen bg-[#09090B] text-zinc-100">
+      {repairDetail && (
+        <UIUpdateRepairModal
+          isOpen={openModal}
+          onClose={() => setOpenModal(false)}
+          repair={repairDetail}
+          key={repairDetail?.id}
+          lodInformation={lodInformation}
+        />
+      )}
       <div className="mx-auto max-w-[1600px] px-6 py-8 lg:px-8">
         {/* Breadcrumb */}
         <div className="mb-6 flex items-center gap-2 text-sm">
@@ -76,7 +47,7 @@ const RepairDetail = () => {
 
           <span className="text-zinc-800">/</span>
 
-          <span className="text-zinc-400">{repair.id}</span>
+          <span className="text-zinc-400">{repairDetail?.id}</span>
         </div>
 
         {/* Page heading */}
@@ -98,7 +69,10 @@ const RepairDetail = () => {
             </p>
           </div>
 
-          <button className="w-fit rounded-xl border border-zinc-800 px-5 py-3 text-sm font-semibold text-zinc-300 transition hover:border-zinc-700 hover:bg-zinc-900">
+          <button
+            className="w-fit rounded-xl border border-zinc-800 px-5 py-3 text-sm font-semibold text-zinc-300 transition hover:border-zinc-700 hover:bg-zinc-900"
+            onClick={() => setOpenModal(true)}
+          >
             Edit repair
           </button>
         </div>
@@ -201,14 +175,6 @@ const RepairDetail = () => {
                         </p>
                       </div>
                     </div>
-
-                    <div className="mt-5">
-                      <p className="text-xs text-zinc-600">Description</p>
-
-                      <p className="mt-1 text-sm leading-6 text-zinc-500">
-                        {repair.vehicle.description}
-                      </p>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -226,7 +192,7 @@ const RepairDetail = () => {
                 </div>
 
                 <span className="rounded-full bg-zinc-900 px-3 py-1 text-xs text-zinc-500">
-                  {repair.workers.length} employees
+                  {repairDetail?.repair_employees?.length} employees
                 </span>
               </div>
 
