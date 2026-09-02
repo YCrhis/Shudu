@@ -71,3 +71,48 @@ export const GetAllUsers = async () => {
     };
   }
 };
+
+export const GetUserById = async (idUser:string) => {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.from("profiles").select(`
+        *,
+        repair_employees (
+          repair_id,
+          user_id,
+          repair (
+            id,
+            name_vehicle,
+            title,
+            description,
+            vehicle_type,
+            license_plate,
+            vehicle_model,
+            init_date,
+            end_date
+          )
+        )
+      `).eq("id", idUser).single();
+
+    if (error) {
+      return {
+        success: false,
+        message: error.message,
+        status: 400,
+      };
+    }
+
+    return {
+      success: true,
+      message: "OK",
+      status: 200,
+      data,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error,
+      status: 400,
+    };
+  }
+};

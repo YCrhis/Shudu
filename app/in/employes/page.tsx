@@ -2,6 +2,7 @@
 
 import { GetCall } from "@/helpers/GetCall";
 import { User } from "@/types/user";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const Employees = () => {
@@ -248,9 +249,9 @@ const Employees = () => {
 
                     {/* Action */}
                     <td className="px-6 py-5 text-right">
-                      <button className="rounded-lg border border-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-400 transition hover:border-amber-500/30 hover:bg-amber-500/5 hover:text-amber-400">
+                      <Link href={`/in/employes/${employee.id}`} className="rounded-lg border border-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-400 transition hover:border-amber-500/30 hover:bg-amber-500/5 hover:text-amber-400">
                         View profile
-                      </button>
+                      </Link>
                     </td>
                   </tr>
                 ))}
